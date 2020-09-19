@@ -7,33 +7,36 @@ and may be a GIMP file (.xcf), a Blender file (.blend), a (Inkscape) SVG file
 (.svg) or anything ImageMagick understands.
 
 Usage
-=====
+-----
 
-	./emotes.sh FILENAME...
+    ./emotes.sh FILENAME...
 
 ### Optional environment variables
 
 * `BLENDER` – path to Blender executable
 * `INKSCAPE` – path to Inkscape executable
 * `GIMP` – path to GIMP executable
+* `SVG_OVERSAMPLING_SIZE` – size to render SVGs with, default is `1120`. Why
+  not just the resolution of the emotes? Because Inkscape doesn't sample
+  embedded raster graphics very well and rendering SVG is fast enough anyway.
 
 ### Example
 
-	./emotes.sh my_emote.svg
+    ./emotes.sh my_emote.svg
 
 Output files:
 
-	my_emote_28.png
-	my_emote_56.png
-	my_emote_112.png
-	my_emote_preview.png
+    my_emote_28.png
+    my_emote_56.png
+    my_emote_112.png
+    my_emote_preview.png
 
 Temporary files:
 
-	my_emote_temp.png
+    my_emote_temp.png
 
 MIT License
-===========
+-----------
 
 Copyright 2020 Mathias Panzenböck
 

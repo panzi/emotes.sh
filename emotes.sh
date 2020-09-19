@@ -4,6 +4,7 @@ set -e
 
 BLENDER=${BLENDER:-blender}
 INKSCAPE=${INKSCAPE:-inkscape}
+SVG_OVERSAMPLING_SIZE=${SVG_OVERSAMPLING_SIZE:-1120}
 GIMP=${GIMP:-gimp}
 
 function pystr () {
@@ -18,12 +19,12 @@ for img in "$@"; do
 	base=$(basename -- "$img")
 	base=${base%.*}
 	
-	case "$img" in
-	*.svg|*.SVG)
+	case "${img,,}" in
+	*.svg)
 		# manual "oversampling" because if there is a raster image
 		# in the SVG it will be sampled really badly by inskape
 		"$INKSCAPE" --export-area-page --export-type=png \
-			--export-width="1120" --export-height="1120" \
+			--export-width="1120" --export-height="$SVG_OVERSAMPLING_SIZE" \
 			--export-filename="${fullpath}_temp.png" "$fullpath"
 		;;
 	esac
@@ -32,21 +33,20 @@ for img in "$@"; do
 		out="${dir}/${base}_${size}.png"
 		echo "$out"
 
-		case "$img" in
-		*.svg|*.SVG)
+		case "${img,,}" in
+		*.svg)
 			convert "${fullpath}_temp.png" -scale "${size}x${size}" "$out"
-		
 			;;
 
-		*.blend|*.BLEND)
-			"$BLENDER" --background "$fullpath" -F PNG -o "$out" --python-expr "
+		*.blend)
+			"$BLENDER" --background --verbose 0 "$fullpath" --render-format PNG \
+				--render-output "$out" --python-expr "
 import bpy
 
 scene = bpy.context.scene
+scene.render.resolution_percentage = 100
 scene.render.resolution_x = $size
 scene.render.resolution_y = $size
-scene.render.image_settings.file_format = 'PNG'
-scene.render.filepath = $(pystr "$out")
 
 bpy.ops.render.render(write_still=True)
 "
@@ -56,7 +56,7 @@ bpy.ops.render.render(write_still=True)
 			fi
 			;;
 
-		*.xcf|*.XCF)
+		*.xcf)
 			"$GIMP" --new-instance --no-interface --batch-interpreter=python-fu-eval --batch="
 import gimpfu
 
@@ -76,8 +76,8 @@ pdb.gimp_image_delete(img)
 		esac
 	done
 	
-	case "$img" in
-	*.svg|*.SVG)
+	case "${img,,}" in
+	*.svg)
 		rm "${fullpath}_temp.png"
 		;;
 	esac
